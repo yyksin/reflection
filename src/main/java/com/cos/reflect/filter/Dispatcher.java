@@ -32,7 +32,7 @@ public class Dispatcher implements Filter {
                     Parameter[] params = method.getParameters();
                     String path;
                     if(params.length > 0){
-                        Object dtoInstance = params[0].getType().newInstance();
+                        Object dtoInstance = params[0].getType().getConstructor().newInstance();
                         setData(dtoInstance, request);
                     }
                     //메서드 실행 및 리턴값
