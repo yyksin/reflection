@@ -7,6 +7,8 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Enumeration;
@@ -33,10 +35,21 @@ public class Dispatcher implements Filter {
                     String path;
                     if(params.length > 0){
                         Object dtoInstance = params[0].getType().getConstructor().newInstance();
+                        Field[] fields = dtoInstance.getClass().getDeclaredFields();
+                        for(Field field : fields){
+                            String varType = field.getType().getSimpleName();
+                            Annotation[] annotations = field.getAnnotations();
+                            //private 변수 값에 접근을 하려면
+                            field.setAccessible(true);
+                            Object o = field.get(dtoInstance);
+                        }
                         setData(dtoInstance, request);
+                        //메서드 실행 및 리턴값
+                        path = (String) method.invoke(userController, dtoInstance);
+                    }else{
+                        path = (String) method.invoke(userController);
                     }
-                    //메서드 실행 및 리턴값
-                    path = (String) method.invoke(userController);
+
                     RequestDispatcher dis = request.getRequestDispatcher(path);
                     dis.forward(request, response);
                 } catch (Exception e) {
